@@ -44,5 +44,4 @@ impl Neuron {
             0.
         }
     }
-
 }

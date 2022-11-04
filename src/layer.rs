@@ -1,25 +1,32 @@
-#[derive(Clone)]
-pub struct Layer<NN: Neuron > { //ricordare di aggiungere un altro ':' quando si crea la libreria
+use std::ptr::null;
+use lifNN::Neuron;
+use ndarray::{Array2, Array};
+
+#[derive(Clone, Debug)]
+
+pub struct Layer<'a, Neuron> { //ricordare di aggiungere un altro ':' quando si crea la libreria
     /// List of all neurons in this layer
-    pub(crate) neuroni: Vec<NN::Neuron>,
+    pub(crate) neuroni: Vec<Neuron>,
     /// Matrix of the input weights (between neurons belonging to different layers). For the first layer, this must be a square diagonal matrix.
     pub(crate) interlayer_weights: Array2<f64>,
     /// Square matrix of the intra-layer weights (between neurons belonging to the same layer)
     pub(crate) intralayer_weights: Array2<f64>,
     // layer precedente
-    pub(crate) prec_layer: Layer<NN: Neuron>,
+    pub(crate) prec_layer: &'a Layer<'a, Neuron>,
     //vec t-1
     pub(crate) internal_spike: Array<f64>,
 }
 
-impl<M: Model> Layer<M> {
 
-    pub fn new(neurons : Vec<NN::Neuron>, IntraW : Array2<f64>, InterW : Array<f64>, layer_p : Option<Layer<NN>>) -> Self{
+
+impl<Neuron> Layer<'_, Neuron> {
+
+    pub fn new(neurons : Vec<Neuron>, intra_w : Array2<f64>, inter_w : Array<f64>, layer_p : Option<Layer<Neuron>>) -> Self{
         Self{
-            interlayer_weights = InterW,
-            intralayer_weights = IntraW,
-            prec_layer = layer_p.unwrap_or(null),
-            neuroni = neurons
+            neuroni = neurons,
+            interlayer_weights = inter_w,
+            intralayer_weights = intra_w,
+            prec_layer = layer_p.unwrap_or(null)            
             //salvare vettore di spike all'interno del layer calcolato nel tempo precedente
         }
     }
