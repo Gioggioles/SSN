@@ -19,17 +19,17 @@ pub struct Neuron{
 impl Neuron {
     pub fn new(vrest: f64, vreset: f64, vth: f64, tauu: f64) -> Neuron {
         Neuron {
-            v_rest = vrest,
-            v_reset = vreset,
-            v_th = vth, 
-            tau = tauu,
-            v_mem = vrest,
-            t_s_prec = 0
+            v_rest : vrest,
+            v_reset : vreset,
+            v_th : vth, 
+            tau : tauu,
+            v_mem : vrest,
+            t_s_prec : 0.0
         }
     }
 
     #[inline]
-    pub fn potential_evolution (&mut self, weighted_sum: f64, t_s: u128) -> f64 {
+    pub fn potential_evolution (&mut self, weighted_sum: f64, t_s: f64) -> f64 {
 
         if weighted_sum == 0.0 { return 0.0 }
         
