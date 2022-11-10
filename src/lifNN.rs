@@ -30,10 +30,10 @@ impl Neuron {
 
     #[inline]
     pub fn potential_evolution (&mut self, weighted_sum: f64, t_s: f64) -> f64 {
-
+        
         if weighted_sum == 0.0 { return 0.0 }
         
-        self.v_mem = self.v_rest + (self.v_mem - self.v_rest) * (self.t_s_prec - t_s / self.tau).exp() + weighted_sum;
+        self.v_mem = self.v_rest + (self.v_mem - self.v_rest) * (self.t_s_prec - t_s / self.tau).exp() + weighted_sum;  //decadenza di v_mem + aggiunta weighted_sum
 
         self.t_s_prec = t_s;
 
