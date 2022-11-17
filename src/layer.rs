@@ -22,14 +22,13 @@ pub struct Layer<Neuron> { //ricordare di aggiungere un altro ':' quando si crea
 
 impl<Neuron> Layer<Neuron> {
 
-    pub fn new(neurons : Vec<Neuron>, intra_w : Array2<f64>, inter_w : Array2<f64>, /*layer_p : Option<Layer<Neuron>>*/) -> Self{
+    pub fn new(neurons : Vec<Neuron>, intra_w : Array2<f64>, inter_w : Array2<f64>) -> Self{
         Self{
             neuroni : neurons,
             interlayer_weights : inter_w,
             intralayer_weights : intra_w,
             internal_spike: Vec::new(), 
-            ts_prec : 0.0
-            //prec_layer : &layer_p.unwrap()                 
+            ts_prec : 0.0        
             //salvare vettore di spike all'interno del layer calcolato nel tempo precedente
         }
     }
@@ -55,7 +54,7 @@ impl<Neuron> Layer<Neuron> {
         }
         self.ts_prec = t_s;
 
-        return self.internal_spike
+        return self.internal_spike.clone()
     }
 
 }
