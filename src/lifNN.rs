@@ -22,7 +22,7 @@ impl Neuron {
             v_reset : vreset,
             v_th : vth, 
             tau : tauu,
-            v_mem : vrest,
+            v_mem : 0.0,
             t_s_prec : 0.0
         }
     }
