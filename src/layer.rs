@@ -24,10 +24,10 @@ impl<Neuron> Layer<Neuron> {
 
     pub fn new(neurons : Vec<Neuron>, intra_w : Array2<f64>, inter_w : Array2<f64>) -> Self{
         Self{
+            internal_spike: vec![0.0; neurons.len()],
             neuroni : neurons,
             interlayer_weights : inter_w,
-            intralayer_weights : intra_w,
-            internal_spike: Vec::new(), 
+            intralayer_weights : intra_w,            
             ts_prec : 0.0        
             //salvare vettore di spike all'interno del layer calcolato nel tempo precedente
         }

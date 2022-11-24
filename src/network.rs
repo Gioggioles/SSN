@@ -45,9 +45,11 @@ impl Network<Layer<Neuron>>{
                 }
             }
 
+
             for m in 0..self.layers.get(i).unwrap().num_neuroni(){  //controlli tutti i neuroni
                 s.push(self.layers.get(i).unwrap().neuroni.get(m).unwrap().clone().potential_evolution(*spike.get(m).unwrap(),ts));
             }
+
 
             for n in 0..self.layers.get(i).unwrap().num_neuroni(){ //Aggiornamento dei collegamenti intraLayer
                 for m in 0..self.layers.get(i).unwrap().num_neuroni(){
@@ -56,7 +58,8 @@ impl Network<Layer<Neuron>>{
             }
 
         } 
-        
+        else{
+
         for n in 0..self.layers.get(i).unwrap().num_neuroni(){
             let mut tot = 0.0;
 
@@ -81,6 +84,7 @@ impl Network<Layer<Neuron>>{
             for m in 0..self.layers.get(i).unwrap().num_neuroni(){
                 self.layers[i].internal_spike[n] += s.get(n).unwrap() * self.layers.get(i).unwrap().intralayer_weights.get((n,m)).unwrap();  //aggiornamento del valore pesato del layer corrente
             }
+        }
         }  
      }
      return s
