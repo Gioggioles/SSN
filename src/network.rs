@@ -24,7 +24,7 @@ impl Network<Layer<Neuron>>{
     }
 
     pub fn aggiorna_neuroni (&mut self, ts : f64, mut spike : Vec<f64>) -> Vec<f64>{  //spike -> vettore di 0/1 dove ogni posizione corrisponde allo spike del neurone i-esimo originale
-        let mut s = Vec::new();
+        let mut s = Vec::new(); //pesi del layer precedente
         
         for i in 0..self.num_layers{
             if i==0 {                
@@ -48,7 +48,12 @@ impl Network<Layer<Neuron>>{
             for m in 0..self.layers.get(i).unwrap().num_neuroni(){  //controlli tutti i neuroni
                 s.push(self.layers.get(i).unwrap().neuroni.get(m).unwrap().clone().potential_evolution(*spike.get(m).unwrap(),ts));
             }
-
+            print!("Layer 1 =");
+            for pollice in 0..s.len(){
+                print!("{}", s.get(pollice).unwrap());
+                print!("-");
+            }
+            print!("\n");
 
             for n in 0..self.layers.get(i).unwrap().num_neuroni(){ //Aggiornamento dei collegamenti intraLayer
                 for m in 0..self.layers.get(i).unwrap().num_neuroni(){
@@ -59,12 +64,13 @@ impl Network<Layer<Neuron>>{
         } 
         else{
 
+        let mut temp = Vec::new();
+
         for n in 0..self.layers.get(i).unwrap().num_neuroni(){
             let mut tot = 0.0;
-            print!("{}", self.layers.get(i).unwrap().num_neuroni());
             for m in 0..self.layers.get(i-1).unwrap().num_neuroni(){
                 tot = tot + s.get(m).unwrap() * self.layers.get(i).unwrap().interlayer_weights.get((n,m)).unwrap(); // valutare se tali neuroni hanno generato uno spike
-            } //errore nel s.unwrap()
+            }
 
             
             tot = tot + *self.layers.get(i).unwrap().clone().get_decadenza_internal_spike(ts).get(n).unwrap();
@@ -73,12 +79,17 @@ impl Network<Layer<Neuron>>{
                 tot=1.0;
             }
 
-            s = Vec::new(); //PERDO I DATI
-
-            s.push(self.layers.get(i).unwrap().neuroni.get(n).unwrap().clone().potential_evolution(tot, ts)); //vettore di spike calcolati nel layer corrente  
-               
+            temp.push(self.layers.get(i).unwrap().neuroni.get(n).unwrap().clone().potential_evolution(tot, ts)); //vettore di spike calcolati nel layer corrente    
         }
 
+        s = temp.clone();
+
+        for indicione in 0..s.len(){
+            print!("{}", s.get(indicione).unwrap());
+            print!("-");
+        }
+        print!("\n");
+        
         for n in 0..self.layers.get(i).unwrap().num_neuroni(){
             for m in 0..self.layers.get(i).unwrap().num_neuroni(){
                 self.layers[i].internal_spike[n] += s.get(n).unwrap() * self.layers.get(i).unwrap().intralayer_weights.get((n,m)).unwrap();  //aggiornamento del valore pesato del layer corrente
