@@ -38,12 +38,6 @@ impl Network<Layer<Neuron>>{
                 }
             }
 
-            for l in 0..spike.len(){  //controllo di spike, non può essere oltre 1
-                if *spike.get(l).unwrap() > 1.0{
-                    spike[l] = 1.0;
-                }
-            }
-
 
             for m in 0..self.layers.get(i).unwrap().num_neuroni(){  //controlli tutti i neuroni
                 s.push(self.layers.get(i).unwrap().neuroni.get(m).unwrap().clone().potential_evolution(*spike.get(m).unwrap(),ts));
@@ -57,8 +51,8 @@ impl Network<Layer<Neuron>>{
 
             for n in 0..self.layers.get(i).unwrap().num_neuroni(){ //Aggiornamento dei collegamenti intraLayer
                 for m in 0..self.layers.get(i).unwrap().num_neuroni(){
-                    self.layers[i].internal_spike[n] += s.get(n).unwrap() * self.layers.get(i).unwrap().intralayer_weights.get((n,m)).unwrap();
-                }
+                    self.layers[i].internal_spike[m] += s.get(n).unwrap() * self.layers.get(i).unwrap().intralayer_weights.get((n,m)).unwrap();
+                } //[[0.0, 0.5, 0.2], [1.0, 0.0, 0.7], [0.1, 0.6, 0.0]]  -  [[0.0, 0.9],[0.8, 0.0]]   -  [[0.0, 0.7, 0.3],[1.1, 0.0, 0.8],[0.3, 0.5, 0.0]]
             }
 
         } 
@@ -71,13 +65,10 @@ impl Network<Layer<Neuron>>{
             for m in 0..self.layers.get(i-1).unwrap().num_neuroni(){
                 tot = tot + s.get(m).unwrap() * self.layers.get(i).unwrap().interlayer_weights.get((n,m)).unwrap(); // valutare se tali neuroni hanno generato uno spike
             }
-
+                //[[0.9, 1.1, 1.1], [0.7, 0.65, 1.0]]  -   [[0.8, 0.8], [0.9, 0.7], [0.7, 1.0]]
             
             tot = tot + *self.layers.get(i).unwrap().clone().get_decadenza_internal_spike(ts).get(n).unwrap();
             
-            if tot > 1.0{
-                tot=1.0;
-            }
 
             temp.push(self.layers.get(i).unwrap().neuroni.get(n).unwrap().clone().potential_evolution(tot, ts)); //vettore di spike calcolati nel layer corrente    
         }
