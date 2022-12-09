@@ -8,7 +8,6 @@ use network::Network;
 use ndarray::prelude::*;
 
 pub fn main() {
-
      
     let mut neurons1 = Vec::new();
     let neurone_11 = Neuron::new(0.6, 0.45, 1.53, 1.2); //1.5
@@ -70,6 +69,4 @@ pub fn main() {
         }
         print!("\n");*/
     }
-
-    
 }

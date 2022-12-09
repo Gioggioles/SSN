@@ -1,21 +1,18 @@
-
 use crate::{layer::Layer, lifNN::Neuron};
 use ndarray::{Array2};
+use std::thread;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct Network<Layer> { //ricordare di aggiungere un altro ':' quando si crea la libreria
-
     pub(crate) layers: Vec<Layer>,
 
     pub(crate) num_layers : usize,
 }
-
 impl Network<Layer<Neuron>>{
 
     pub fn new() -> Self{
         Network { layers: Vec::new(), num_layers: 0 }
     }
-
 
     pub fn add_layer(&mut self, neurons: Vec<Neuron>, interlayer_weights: Array2<f64>, intralayer_weights: Array2<f64>) { 
            let l = Layer::new(neurons.clone(), intralayer_weights.clone(), interlayer_weights.clone());
@@ -56,22 +53,30 @@ impl Network<Layer<Neuron>>{
             }
 
         } 
-        else{
-
-        let mut temp = Vec::new();
-
+        else{      
         for n in 0..self.layers.get(i).unwrap().num_neuroni(){
+            let mut layer_temp = self.layers.get(i).unwrap().clone();
+            let layer_temp_p = self.layers.get(i-1).unwrap().clone();
+            let mut temp = Vec::new();
+            let mut vt = Vec::new();
+    
+            vt.push(std::thread::spawn(move||{
             let mut tot = 0.0;
-            for m in 0..self.layers.get(i-1).unwrap().num_neuroni(){
-                tot = tot + s.get(m).unwrap() * self.layers.get(i).unwrap().interlayer_weights.get((n,m)).unwrap(); // valutare se tali neuroni hanno generato uno spike
+            for m in 0..layer_temp_p.num_neuroni(){
+                tot = tot + s.get(m).unwrap() * layer_temp.get_interlayer_weight(n,m).unwrap(); // valutare se tali neuroni hanno generato uno spike
             }
                 //[[0.9, 1.1, 1.1], [0.7, 0.65, 1.0]]  -   [[0.8, 0.8], [0.9, 0.7], [0.7, 1.0]]
-            
-            tot = tot + *self.layers.get(i).unwrap().clone().get_decadenza_internal_spike(ts).get(n).unwrap();
-            
+        
+            tot = tot + *layer_temp.get_decadenza_internal_spike(ts).get(n).unwrap();
 
-            temp.push(self.layers.get(i).unwrap().neuroni.get(n).unwrap().clone().potential_evolution(tot, ts)); //vettore di spike calcolati nel layer corrente    
+            //inseriscinelvettore struct -> vettore mutex,condvar questa struct sara messa dentro un ARC
+
+            temp.push(layer_temp.get_neuroni_mut(n).unwrap().clone().potential_evolution(tot, ts)); //vettore di spike calcolati nel layer corrente    
+        }));
+        for v in vt{
+            v.join().unwrap();
         }
+    }
 
         s = temp.clone();
 
