@@ -49,7 +49,7 @@ impl<Neuron> Layer<Neuron> {
         self.interlayer_weights.get((row, coloumn)).copied()
     }
     pub fn get_decadenza_internal_spike(&mut self, t_s: f64) -> Vec<f64>{
-        for n in 0..self.internal_spike.len(){
+        for n in 0..self.internal_spike.len(){  //IPOTESI THREAD
             self.internal_spike[n] = self.internal_spike.get(n).unwrap()*((self.ts_prec-t_s)/* moltiplicare per una lambda */).exp();
         }
         self.ts_prec = t_s;

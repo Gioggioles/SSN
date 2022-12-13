@@ -52,21 +52,16 @@ pub fn main() {
     network.add_layer(neurons2, inter2, intra2);
     network.add_layer(neurons3, inter3, intra3);
 
-    let spike_m: Array2::<f64> = array![[1.0, 0.0, 1.0],[0.0, 1.0, 1.0],[1.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [1.0, 0.0, 1.0], [1.0, 0.0, 0.0]]; //spike che diamo al primo layer in tempi differenti
+    let spike_m: Array2::<f64> = array![[1.0, 0.0, 1.0],[0.0, 1.0, 1.0],[1.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0]]; //spike che diamo al primo layer in tempi differenti
 
-    //array![[1.0, 0.0, 0.0],[0.0, 1.0, 1.0],[1.0, 0.0, 1.0], [0.0, 0.0, 1.0], [1.0, 1.0, 0.0], [1.0, 1.0, 1.0], [0.0, 1.0, 0.0]]; 
 
-    let tempi = vec![1.5, 2.0, 3.0, 5.0, 6.0, 8.0, 11.0];
+    let tempi = vec![1.5, 2.0, 3.0, 5.0, 6.0, 7.5, 8.0];
 
     //, 2.0, 3.0, 5.0, 6.0, 8.0, 11.0
 
     let mut count = 0;
     for ts in tempi{
-        let stampa = network.aggiorna_neuroni(ts, spike_m.row(count).to_vec());
+        network.aggiorna_neuroni(ts, spike_m.row(count).to_vec());
         count+=1;
-        /*for  i in stampa{
-            print!("{}", i);
-        }
-        print!("\n");*/
     }
 }

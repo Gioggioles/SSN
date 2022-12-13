@@ -26,16 +26,6 @@ impl Neuron {
             t_s_prec : 0.0
         }
     }
-    /* neurone_11 = (0.6, 0.45, 1.4, 1.2) 
-    neurone_12 = (0.6, 0.4, 1.5, 1.1)  
-    neurone_13 = (0.7, 0.3, 1.65, 1.3)
-    
-    neurone21 = (0.6, 0.5, 1.4, 1.2)
-    neurone22 = (0.7, 0.5, 1.5, 1.1)
-    
-    neurone31 = (0.77, 0.5, 1.6, 1.2);
-    neurone32 = (0.7, 0.47, 1.6, 1.3);
-    neurone33 = (0.8, 0.5, 1.5, 1.1);*/
 
     #[inline]
     pub fn potential_evolution (&mut self, weighted_sum: f64, t_s: f64) -> f64 {

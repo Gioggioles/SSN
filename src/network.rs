@@ -1,5 +1,8 @@
+use crate::layer;
 use crate::{layer::Layer, lifNN::Neuron};
 use ndarray::{Array2};
+use std::sync::{Arc, Mutex};
+use std::thread::JoinHandle;
 use std::thread;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
@@ -29,16 +32,32 @@ impl Network<Layer<Neuron>>{
             //spike = spike + self.layers.get(i).unwrap().get_decadenza_internal_spike(ts);
             let mut m = self.layers.get(i).unwrap().clone();
             let a = m.get_decadenza_internal_spike(ts);
-            if a.len() == spike.len(){
                 for l in 0..spike.len(){  
                     spike[l] = spike[l] + a[l];
-                }
+                
             }
 
+            let temp = Arc::new(Mutex::new(Vec::<f64>::new()));
 
             for m in 0..self.layers.get(i).unwrap().num_neuroni(){  //controlli tutti i neuroni
-                s.push(self.layers.get(i).unwrap().neuroni.get(m).unwrap().clone().potential_evolution(*spike.get(m).unwrap(),ts));
+                let mut vt = Vec::new();
+                let temp = temp.clone();
+                let mut primo_layer = self.layers.get(i).unwrap().clone();
+                let spike_temp = spike.clone();
+                
+                vt.push(std::thread::spawn(move || {
+                    temp.lock().unwrap().push(primo_layer.get_neuroni_mut(m).unwrap().clone().potential_evolution(*spike_temp.get(m).unwrap(),ts));
+                }));
+             for v in vt{
+                v.join().unwrap();
+            }   
+            
             }
+
+            
+
+            s = temp.lock().unwrap().to_vec();
+
             print!("Layer 1 =");
             for pollice in 0..s.len(){
                 print!("{}", s.get(pollice).unwrap());
@@ -46,53 +65,86 @@ impl Network<Layer<Neuron>>{
             }
             print!("\n");
 
+
+            let internal_temp = Arc::new(Mutex::new(Vec::from(self.layers[i].internal_spike.clone())));
+
             for n in 0..self.layers.get(i).unwrap().num_neuroni(){ //Aggiornamento dei collegamenti intraLayer
-                for m in 0..self.layers.get(i).unwrap().num_neuroni(){
-                    self.layers[i].internal_spike[m] += s.get(n).unwrap() * self.layers.get(i).unwrap().intralayer_weights.get((n,m)).unwrap();
-                } //[[0.0, 0.5, 0.2], [1.0, 0.0, 0.7], [0.1, 0.6, 0.0]]  -  [[0.0, 0.9],[0.8, 0.0]]   -  [[0.0, 0.7, 0.3],[1.1, 0.0, 0.8],[0.3, 0.5, 0.0]]
-            }
+                let mut vet_internal_spike =  Vec::new();
+                let internal_temp = internal_temp.clone();
+                let layer_temp = self.layers.get(i).unwrap().clone();
+                let temporaneo = s.clone();
+                vet_internal_spike.push(std::thread::spawn(move || {
+                    for m in 0..layer_temp.num_neuroni(){                    
+                        internal_temp.lock().unwrap()[m] += temporaneo.get(n).unwrap() * layer_temp.get_intralayer_weight(n, m).unwrap();
+                    } 
+              }));
 
-        } 
-        else{      
-        for n in 0..self.layers.get(i).unwrap().num_neuroni(){
-            let mut layer_temp = self.layers.get(i).unwrap().clone();
-            let layer_temp_p = self.layers.get(i-1).unwrap().clone();
-            let mut temp = Vec::new();
-            let mut vt = Vec::new();
+              for v in vet_internal_spike{
+                v.join().unwrap();
+              }
+        }
+            self.layers[i].internal_spike = internal_temp.lock().unwrap().to_vec();
+
+            }    
+            else{      
+                let temp = Arc::new(Mutex::new(Vec::<f64>::new()));
+
+                for n in 0..self.layers.get(i).unwrap().num_neuroni(){
+                    let mut layer_temp = self.layers.get(i).unwrap().clone();
+                    let layer_temp_p = self.layers.get(i-1).unwrap().clone();
+                    let mut vt = Vec::new();
+                    let temp = temp.clone();
+                    let temporaneo = s.clone();
+
+                    vt.push(std::thread::spawn(move||{
+                        let mut tot = 0.0;
+                        for m in 0..layer_temp_p.num_neuroni(){
+
+                            //let t = Arc::new(Mutex::new(Vec::<f64>::new())); IPOTESI DI THREAD ANCHE PER QUESTO for
+                            //let mut vt = Vec::new();
+                            tot = tot + temporaneo.get(m).unwrap() * layer_temp.get_interlayer_weight(n,m).unwrap(); // valutare se tali neuroni hanno generato uno spike
+                        }
+                    
+                        tot = tot + *layer_temp.get_decadenza_internal_spike(ts).get(n).unwrap();
+
+                        temp.lock().unwrap().push(layer_temp.get_neuroni_mut(n).unwrap().clone().potential_evolution(tot, ts)); //vettore di spike calcolati nel layer corrente    
+                    }));
+
+                    for v in vt{
+                        v.join().unwrap();
+                    }
+                }
+
+                s = temp.lock().unwrap().to_vec();
+
+                let internal_temp = Arc::new(Mutex::new(Vec::from(self.layers[i].internal_spike.clone())));
+
+                for n in 0..self.layers.get(i).unwrap().num_neuroni(){ //Aggiornamento dei collegamenti intraLayer
+                    let mut vet_internal_spike =  Vec::new();
+                    let internal_temp = internal_temp.clone();
+                    let layer_temp = self.layers.get(i).unwrap().clone();
+                    let temporaneo = s.clone();
+                    vet_internal_spike.push(std::thread::spawn(move || {
+                        for m in 0..layer_temp.num_neuroni(){    //IPOTESI DI THREAD ANCHE PER QUESTO for                 
+                            internal_temp.lock().unwrap()[m] += temporaneo.get(n).unwrap() * layer_temp.get_intralayer_weight(n, m).unwrap();
+                        } 
+                  }));
     
-            vt.push(std::thread::spawn(move||{
-            let mut tot = 0.0;
-            for m in 0..layer_temp_p.num_neuroni(){
-                tot = tot + s.get(m).unwrap() * layer_temp.get_interlayer_weight(n,m).unwrap(); // valutare se tali neuroni hanno generato uno spike
+                  for v in vet_internal_spike{
+                    v.join().unwrap();
+                  }
             }
-                //[[0.9, 1.1, 1.1], [0.7, 0.65, 1.0]]  -   [[0.8, 0.8], [0.9, 0.7], [0.7, 1.0]]
-        
-            tot = tot + *layer_temp.get_decadenza_internal_spike(ts).get(n).unwrap();
 
-            //inseriscinelvettore struct -> vettore mutex,condvar questa struct sara messa dentro un ARC
-
-            temp.push(layer_temp.get_neuroni_mut(n).unwrap().clone().potential_evolution(tot, ts)); //vettore di spike calcolati nel layer corrente    
-        }));
-        for v in vt{
-            v.join().unwrap();
-        }
-    }
-
-        s = temp.clone();
-
-        for indicione in 0..s.len(){
-            print!("{}", s.get(indicione).unwrap());
-            print!("-");
-        }
-        print!("\n");
-        
-        for n in 0..self.layers.get(i).unwrap().num_neuroni(){
-            for m in 0..self.layers.get(i).unwrap().num_neuroni(){
-                self.layers[i].internal_spike[n] += s.get(n).unwrap() * self.layers.get(i).unwrap().intralayer_weights.get((n,m)).unwrap();  //aggiornamento del valore pesato del layer corrente
+            for indicione in 0..s.len(){
+                print!("{}", s.get(indicione).unwrap());
+                print!("-");
             }
+            print!("\n");
+
+                self.layers[i].internal_spike = internal_temp.lock().unwrap().to_vec();
+    
+            }  
         }
-        }  
-     }
-     return s
+        return s
     }       
 }       
