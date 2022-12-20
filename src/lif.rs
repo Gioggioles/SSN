@@ -5,13 +5,13 @@ pub struct Neuron{
 
     pub v_reset: f64,
 
-    pub v_th: f64,  //threshold
+    pub v_th: f64,  
 
     pub tau: f64,
 
-    pub v_mem : f64,  //inizializzato a vreset
+    pub v_mem : f64,  //inizializzato a 0.0
 
-    pub t_s_prec : f64,
+    pub t_s_prec : f64, //inizializzato a 0.0
     
 }
 
@@ -33,9 +33,9 @@ impl Neuron {
         
         self.v_mem = self.v_rest + (self.v_mem - self.v_rest) * (self.t_s_prec - t_s / self.tau).exp() + weighted_sum;  //decadenza di v_mem + aggiunta weighted_sum
 
-        self.t_s_prec = t_s;
+        self.t_s_prec = t_s; 
 
-        if self.v_mem > self.v_th {
+        if self.v_mem > self.v_th {  //controllo superamento treshold
             self.v_mem = self.v_reset;
             1. 
         } else {

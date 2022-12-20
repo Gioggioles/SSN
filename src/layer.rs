@@ -1,35 +1,27 @@
-//use std::ptr::null;
-use ndarray::{Array2};
-
+use ndarray::Array2;
+use std::sync::{Arc, Mutex};
 #[derive(Clone, Debug)]
 
-pub struct Layer<Neuron> { //ricordare di aggiungere un altro ':' quando si crea la libreria
-    /// List of all neurons in this layer
-    pub(crate) neuroni: Vec<Neuron>,
-    /// Matrix of the input weights (between neurons belonging to different layers). For the first layer, this must be a square diagonal matrix.
-    pub(crate) interlayer_weights: Array2<f64>,
-    /// Square matrix of the intra-layer weights (between neurons belonging to the same layer)
-    pub(crate) intralayer_weights: Array2<f64>,
-    // layer precedente
-    //pub(crate) prec_layer: &Layer<Neuron>,  //Pensare di levare tale Layer e riscrivere la funzione aggiorna neuroni dentro Network
-    //vec t-1
-    pub(crate) internal_spike: Vec<f64>,
+pub struct Layer<Neuron> {
+    pub(crate) neuroni: Vec<Neuron>, // List of all neurons in this layer
+    
+    pub(crate) interlayer_weights: Array2<f64>, // Matrix of the input weights (between neurons belonging to different layers). For the first layer, this must be a square diagonal matrix.
+    
+    pub(crate) intralayer_weights: Array2<f64>, // Square matrix of the intra-layer weights (between neurons belonging to the same layer)
+    
+    pub(crate) internal_spike: Vec<f64>, // Current value of spike for each Neuron of this layer
 
-    pub(crate) ts_prec: f64,
+    pub(crate) ts_prec: f64, // Time of previous update 
 }
 
-
-
 impl<Neuron> Layer<Neuron> {
-
     pub fn new(neurons : Vec<Neuron>, intra_w : Array2<f64>, inter_w : Array2<f64>) -> Self{
         Self{
             internal_spike: vec![0.0; neurons.len()],
             neuroni : neurons,
             interlayer_weights : inter_w,
             intralayer_weights : intra_w,            
-            ts_prec : 0.0        
-            //salvare vettore di spike all'interno del layer calcolato nel tempo precedente
+            ts_prec : 0.0 
         }
     }
 
@@ -41,20 +33,33 @@ impl<Neuron> Layer<Neuron> {
         self.neuroni.get_mut(neuroni)
     }
 
-    pub fn get_intralayer_weight(&self, row: usize, coloumn: usize) -> Option<f64> {
-        self.intralayer_weights.get((row, coloumn)).copied()
+    pub fn get_intralayer_weight(&self, row: usize, coloumn: usize) -> Option<&f64> {
+        self.intralayer_weights.get((row, coloumn))
     }
 
-    pub fn get_interlayer_weight(&self, row: usize, coloumn: usize) -> Option<f64> {
-        self.interlayer_weights.get((row, coloumn)).copied()
+    pub fn get_interlayer_weight(&self, row: usize, coloumn: usize) -> Option<&f64> {
+        self.interlayer_weights.get((row, coloumn))
     }
-    pub fn get_decadenza_internal_spike(&mut self, t_s: f64) -> Vec<f64>{
-        for n in 0..self.internal_spike.len(){  //IPOTESI THREAD
-            self.internal_spike[n] = self.internal_spike.get(n).unwrap()*((self.ts_prec-t_s)/* moltiplicare per una lambda */).exp();
+    pub fn get_decadenza_internal_spike(&mut self, t_s: f64) -> Vec<f64>{ 
+        let mut vt = Vec::new();
+        let internal_temp = Arc::new(Mutex::new(Vec::from(self.internal_spike.clone())));
+        let t_pr = self.ts_prec;
+        for n in 0..self.internal_spike.len(){ 
+            let internal_temp = internal_temp.clone();     
+            vt.push(std::thread::spawn(move ||{
+                let temp = internal_temp.lock().unwrap();
+                let t = temp.get(n).unwrap() *((t_pr-t_s)/* moltiplicare per una lambda */).exp();
+                drop(temp);
+                internal_temp.lock().unwrap()[n] = t;
+            }));
         }
+        for v in vt{
+            v.join().unwrap();
+        } 
+
+        self.internal_spike = internal_temp.lock().unwrap().to_vec();
         self.ts_prec = t_s;
 
         return self.internal_spike.clone()
     }
-
 }

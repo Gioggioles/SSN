@@ -1,26 +1,27 @@
-use lifNN::Neuron;
-
-pub mod lifNN;
-pub mod layer;
-mod network;
-use ndarray::{Array2};
+use lif::Neuron;
 use network::Network;
+use ndarray::Array2;
 use ndarray::prelude::*;
+
+pub mod lif;
+pub mod layer;
+pub mod network;
+
 
 pub fn main() {
      
     let mut neurons1 = Vec::new();
-    let neurone_11 = Neuron::new(0.6, 0.45, 1.53, 1.2); //1.5
-    let neurone_12 = Neuron::new(0.6, 0.4, 1.6, 1.1);  //1.6
-    let neurone_13 = Neuron::new(0.68, 0.35, 1.52, 1.3); //1.75
+    let neurone_11 = Neuron::new(0.6, 0.45, 1.53, 1.2); 
+    let neurone_12 = Neuron::new(0.6, 0.4, 1.6, 1.1);  
+    let neurone_13 = Neuron::new(0.68, 0.35, 1.52, 1.3); 
     neurons1.push(neurone_11);
     neurons1.push(neurone_12);
     neurons1.push(neurone_13);
     
 
     let mut neurons2 = Vec::new();
-    let neurone21 = Neuron::new(0.6, 0.53, 1.45, 1.2); //1.1
-    let neurone22 = Neuron::new(0.7, 0.5, 1.44, 1.1); //1.3
+    let neurone21 = Neuron::new(0.6, 0.53, 1.45, 1.2); 
+    let neurone22 = Neuron::new(0.7, 0.5, 1.44, 1.1); 
 
     neurons2.push(neurone21);
     neurons2.push(neurone22);
@@ -52,16 +53,13 @@ pub fn main() {
     network.add_layer(neurons2, inter2, intra2);
     network.add_layer(neurons3, inter3, intra3);
 
-    let spike_m: Array2::<f64> = array![[1.0, 0.0, 1.0],[0.0, 1.0, 1.0],[1.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0]]; //spike che diamo al primo layer in tempi differenti
-
+    let spike_m: Array2::<f64> = array![[1.0, 0.0, 1.0],[0.0, 1.0, 1.0],[1.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0]];
 
     let tempi = vec![1.5, 2.0, 3.0, 5.0, 6.0, 7.5, 8.0];
 
-    //, 2.0, 3.0, 5.0, 6.0, 8.0, 11.0
-
     let mut count = 0;
     for ts in tempi{
-        network.aggiorna_neuroni(ts, spike_m.row(count).to_vec());
+        network.aggiorna_neuroni(ts, spike_m.row(count).to_vec()); //Propagazione dello spike, e aggiornamento dei valori, all'interno della rete
         count+=1;
     }
 }
