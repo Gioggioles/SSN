@@ -28,8 +28,7 @@ impl Neuron {
     }
 
     #[inline]
-    pub fn potential_evolution (&mut self, weighted_sum: f64, t_s: f64) -> f64 {
-        
+    pub fn potential_evolution (&mut self, weighted_sum: f64, t_s: f64) -> f64 { //funzione di calcolo dello spike del singolo neurone
         
         self.v_mem = self.v_rest + (self.v_mem - self.v_rest) * (self.t_s_prec - t_s / self.tau).exp() + weighted_sum;  //decadenza di v_mem + aggiunta weighted_sum
 

@@ -7,7 +7,6 @@ pub mod lif;
 pub mod layer;
 pub mod network;
 
-
 pub fn main() {
      
     let mut neurons1 = Vec::new();
@@ -36,29 +35,32 @@ pub fn main() {
     neurons3.push(neurone32);
     neurons3.push(neurone33);
 
-
+    //Creiamo le matrici dei pesi Intra e Inter Layer
     let intra1: Array2::<f64> =  array![[0.0, 0.5, 0.2], [1.0, 0.0, 0.7], [0.3, 0.6, 0.0]];
     let inter1 =  Array2::from_shape_vec((3, 1), vec![1.0, 1.0, 1.0]).unwrap();
 
     let intra2: Array2::<f64> = array![[0.0, 0.9],[0.8, 0.0]]; //2x2
-    let inter2: Array2::<f64> = array![[0.7, 0.8, 0.9], [0.9, 0.65, 0.88]]; //2x3
+    let inter2: Array2::<f64> = array![[0.7, 0.8, 0.89], [0.9, 0.65, 0.88]]; //2x3
 
     let intra3: Array2::<f64> = array![[0.0, 0.7, 0.4],[1.0, 0.0, 0.8],[0.9, 0.1, 0.0]]; //3x3
     let inter3: Array2::<f64> = array![[0.8, 0.7], [0.8, 0.7], [0.86, 0.75]]; //3x2
     
     
-    
+    //Creiamo la rete aggiungendo i vari Layer
     let mut network = Network::new();
     network.add_layer(neurons1, inter1, intra1);
     network.add_layer(neurons2, inter2, intra2);
     network.add_layer(neurons3, inter3, intra3);
 
-    let spike_m: Array2::<f64> = array![[1.0, 0.0, 1.0],[0.0, 1.0, 1.0],[1.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0]];
+    //vettore degli imput al primo layer
+    let spike_m: Array2::<f64> = array![[1.0, 0.0, 1.0],[0.0, 1.0, 1.0],[1.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0]];
 
-    let tempi = vec![1.5, 2.0, 3.0, 5.0, 6.0, 7.5, 8.0];
+    //vettore dei tempi
+    let tempi = vec![1.5, 2.0, 3.0, 5.0, 6.0, 7.5, 9.0];
 
     let mut count = 0;
     for ts in tempi{
+        print!("Tempo = {}\n", ts);
         network.aggiorna_neuroni(ts, spike_m.row(count).to_vec()); //Propagazione dello spike, e aggiornamento dei valori, all'interno della rete
         count+=1;
     }
