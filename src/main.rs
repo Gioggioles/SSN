@@ -53,14 +53,14 @@ pub fn main() {
     network.add_layer(neurons3, inter3, intra3);
 
     //vettore degli imput al primo layer
-    let spike_m: Array2::<f64> = array![[1.0, 0.0, 1.0],[0.0, 1.0, 1.0],[1.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0]];
+    let spike_m: Array2::<f64> = array![[1.0, 0.0, 1.0],[0.0, 1.0, 1.0],[1.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0]];
 
     //vettore dei tempi
     let tempi = vec![1.5, 2.0, 3.0, 5.0, 6.0, 7.5, 9.0];
 
     let mut count = 0;
     for ts in tempi{
-        print!("Tempo = {}\n", ts);
+        print!("\nTempo = {}\n", ts);
         network.aggiorna_neuroni(ts, spike_m.row(count).to_vec()); //Propagazione dello spike, e aggiornamento dei valori, all'interno della rete
         count+=1;
     }
