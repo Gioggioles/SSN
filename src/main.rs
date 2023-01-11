@@ -8,7 +8,7 @@ pub mod layer;
 pub mod network;
 
 pub fn main() {
-     
+
     let mut neurons1 = Vec::new();
     let neurone_11 = Neuron::new(0.6, 0.45, 1.53, 1.2); 
     let neurone_12 = Neuron::new(0.6, 0.4, 1.6, 1.1);  
@@ -36,13 +36,13 @@ pub fn main() {
     neurons3.push(neurone33);
 
     //Creiamo le matrici dei pesi Intra e Inter Layer
-    let intra1: Array2::<f64> =  array![[0.0, 0.5, 0.2], [1.0, 0.0, 0.7], [0.3, 0.6, 0.0]];
+    let intra1: Array2::<f64> =  array![[0.0, 0.6, 0.4], [1.0, 0.0, 0.7], [-0.2, 0.62, 0.0]];
     let inter1 =  Array2::from_shape_vec((3, 1), vec![1.0, 1.0, 1.0]).unwrap();
 
     let intra2: Array2::<f64> = array![[0.0, 0.9],[0.8, 0.0]]; //2x2
     let inter2: Array2::<f64> = array![[0.7, 0.8, 0.89], [0.9, 0.65, 0.88]]; //2x3
 
-    let intra3: Array2::<f64> = array![[0.0, 0.7, 0.4],[1.0, 0.0, 0.8],[0.9, 0.1, 0.0]]; //3x3
+    let intra3: Array2::<f64> = array![[0.0, 0.7, 0.4],[1.0, 0.0, 0.8],[0.9, -0.1, 0.0]]; //3x3
     let inter3: Array2::<f64> = array![[0.8, 0.7], [0.8, 0.7], [0.86, 0.75]]; //3x2
     
     
@@ -64,4 +64,5 @@ pub fn main() {
         network.aggiorna_neuroni(ts, spike_m.row(count).to_vec()); //Propagazione dello spike, e aggiornamento dei valori, all'interno della rete
         count+=1;
     }
+
 }
