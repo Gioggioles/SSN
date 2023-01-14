@@ -1,5 +1,5 @@
-#[derive(Clone, Debug, Copy)]
-pub struct Neuron{
+    #[derive(Clone, Debug, Copy)]    
+    pub struct Neuron{
 
     pub v_rest: f64,
 

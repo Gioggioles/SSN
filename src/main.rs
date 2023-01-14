@@ -1,11 +1,9 @@
-use lif::Neuron;
-use network::Network;
 use ndarray::Array2;
 use ndarray::prelude::*;
+use ssn::{lif::Neuron, network::Network};
 
-pub mod lif;
-pub mod layer;
-pub mod network;
+
+
 
 pub fn main() {
 
