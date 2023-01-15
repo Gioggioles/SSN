@@ -54,7 +54,7 @@ pub fn main() {
     let spike_m: Array2::<f64> = array![[1.0, 0.0, 1.0],[0.0, 1.0, 1.0],[1.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0]];
 
     //vettore dei tempi
-    let tempi = vec![1.5, 2.0, 3.0, 5.0, 6.0, 7.5, 9.0];
+    let tempi = vec![1.5, 2.0, 3.0, 5.0, 6.0, 7.5, 9.1];
 
     let mut count = 0;
     for ts in tempi{
